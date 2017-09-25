@@ -14,7 +14,7 @@ Dependencies:
 
 Contents of *help(vision)*:
 
-Help on module vision:
+    Help on module vision:
 
     NAME
         vision - Computer Vision library for Python-3.x
