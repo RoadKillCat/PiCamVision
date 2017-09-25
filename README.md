@@ -16,24 +16,24 @@ Contents of *help(vision)*:
 
 Help on module vision:
 
-NAME
-    vision - Computer Vision library for Python-3.x
+    NAME
+        vision - Computer Vision library for Python-3.x
 
-DESCRIPTION
-    Support only for RPI camera module
+    DESCRIPTION
+        Support only for RPI camera module
 
-FUNCTIONS
-    convertToGreyscale(img)
-        Returns img conveted to greyscale
+    FUNCTIONS
+        convertToGreyscale(img)
+            Returns img conveted to greyscale
+        
+        getKernel(size, sigma)
+            Returns Kernel matrix required for Gaussian Blur
+        
+        getRawImg()
+            Returns numpy array of the raw camera data of size 1663x1232
     
-    getKernel(size, sigma)
-        Returns Kernel matrix required for Gaussian Blur
+    FILE
+        /home/pi/PiCamVision/vision.py
     
-    getRawImg()
-        Returns numpy array of the raw camera data of size 1663x1232
-
-FILE
-    /home/pi/PiCamVision/vision.py
-
-(END)
+    (END)
 
