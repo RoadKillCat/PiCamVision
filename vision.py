@@ -8,7 +8,6 @@ import math
 def getRawImg(x, y):
     """Returns numpy array of the raw camera data of size 1663x1232"""
     import picamera
-    import picamera.array
     x = int(32*math.ceil(x/32))
     y = int(16*math.ceil(y/16))
     with picamera.PiCamera() as camera:
@@ -29,11 +28,14 @@ def getKernel(size, sigma):
     return np.array([[v/weightSum for v in r] for r in weightMatrix])
 
 def gaussianBlur(img, kSize, kSigma):
-    """Return numpy array of the greyscale img gaussian blurred with the size and sigma vals"""
+    """Returns a numpy array of the greyscale img gaussian blurred with the size and sigma vals"""
     kernel = getKernel(kSize, kSigma)
     d = int((kSize-1)/2)
     gaussian = np.zeros(img.shape, dtype="uint8")
     for y in range(d, img.shape[0]-d):
         for x in range(d, img.shape[1]-d):
-            gaussian[y][x] = np.sum(np.multiply(img[y-d:y+d+1, x-d:x+d+1], kernel))
+            #gaussian[y][x] = np.sum(np.multiply(img[y-d:y+d+1, x-d:x+d+1], kernel))
+            for yy in range(kSize):
+                for xx in range(kSize):
+                    gaussian[y][x] += img[(y-d)+yy][(x-d)+xx] * kernel[-d+yy][-d+xx]
     return gaussian
