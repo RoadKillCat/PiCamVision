@@ -45,16 +45,37 @@ def gaussianBlur(img, kSize, kSigma):
     return gaussian
 
 def sobel(img):
-    """Returns a numpy array of the edges in the greyscale img"""
+    """Returns a numpy array of the edges as seperate gradients, combined in the form [gx, gy, g] from the greyscale img"""
     xKernel = np.array([[-1,0,1],[-2,0,2],[-1,0,1]])
     yKernel = np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
-    sobelled = np.zeros((img.shape[0]-2, img.shape[1]-2), dtype="uint8")
+    sobelled = np.zeros((img.shape[0]-2, img.shape[1]-2, 3), dtype="uint8")
     for y in range(1, img.shape[0]-1):
         for x in range(1, img.shape[1]-1):
-            val = np.sum(np.multiply(img[y-1:y+2, x-1:x+2], xKernel))
-            sobelled[y-1][x-1] = val/4
-            if val > 255:
-                print("problem")
+            gx = np.sum(np.multiply(img[y-1:y+2, x-1:x+2], xKernel))
+            gy = np.sum(np.multiply(img[y-1:y+2, x-1:x+2], yKernel))
+            g = math.sqrt(gx ** 2 + gy ** 2)
+            #g = g if g > 0 and g < 255 else (0 if g < 0 else 255)
+            sobelled[y-1][x-1] = [gx, gy, g]
     return sobelled
+
+
+def canny(img):
+    """Returns a numpy array of thinned edges with double threshold from sobel operators"""
+    sbl = sobel(img)
+    can = np.zeros((img.shape[0], img.shape[1]), dtype="uint8")
+    for y in range(1, sbl.shape[0]-1):
+        for x in range(1,sbl.shape[1]-1):
+            theta = math.atan2(sbl[y][x][0], sbl[y][x][1]) * (180 / math.pi)
+            edge = int(45 * round(theta/45))
+            if edge == 0:
+                can[y][x] = sbl[y][x][2] if sbl[y][x][2] > sbl[y][x-1][2] and sbl[y][x][2] > sbl[y][x+1][2] else 0
+            elif edge == 45:
+                can[y][x] = sbl[y][x][2] if sbl[y][x][2] > sbl[y-1][x-1][2] and sbl[y][x][2] > sbl[y+1][x+1][2] else 0
+            elif edge == 90:
+                can[y][x] = sbl[y][x][2] if sbl[y][x][2] > sbl[y-1][x][2] and sbl[y][x][2] > sbl[y+1][x][2] else 0
+            elif edge == 135:
+                can[y][x] = sbl[y][x][2] if sbl[y][x][2] > sbl[y-1][x+1] and sbl[y][x][2] > sbl[y+1][x-1][2] else 0 
+
+    return can
 
 
