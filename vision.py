@@ -44,8 +44,8 @@ def gaussianBlur(img, kSize, kSigma):
             #        gaussian[y][x] += img[(y-d)+yy][(x-d)+xx] * kernel[-d+yy][-d+xx]
     return gaussian
 
-def sobel(img):
-    """Returns a numpy array of the edges as seperate gradients, combined in the form [gx, gy, g] from the greyscale img"""
+def sobel(img, seperate=False):
+    """Returns a numpy array of the edges as gradients or if seperate, seperate gradients in the form [gx, gy, g] from the greyscale img"""
     xKernel = np.array([[-1,0,1],[-2,0,2],[-1,0,1]])
     yKernel = np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
     sobelled = np.zeros((img.shape[0]-2, img.shape[1]-2, 3), dtype="uint8")
@@ -53,15 +53,18 @@ def sobel(img):
         for x in range(1, img.shape[1]-1):
             gx = np.sum(np.multiply(img[y-1:y+2, x-1:x+2], xKernel))
             gy = np.sum(np.multiply(img[y-1:y+2, x-1:x+2], yKernel))
-            g = math.sqrt(gx ** 2 + gy ** 2)
-            #g = g if g > 0 and g < 255 else (0 if g < 0 else 255)
-            sobelled[y-1][x-1] = [gx, gy, g]
+            g = abs(gx) + abs(gy) #math.sqrt(gx ** 2 + gy ** 2)
+            if seperate:
+               sobelled[y-1][x-1] = [gx, gy, g]
+            else:
+               g = g if g > 0 and g < 255 else (0 if g < 0 else 255)
+               sobelled[y-1][x-2] = g
     return sobelled
 
 
 def canny(img):
     """Returns a numpy array of thinned edges with double threshold from sobel operators"""
-    sbl = sobel(img)
+    sbl = sobel(img, True)
     can = np.zeros((img.shape[0], img.shape[1]), dtype="uint8")
     for y in range(1, sbl.shape[0]-1):
         for x in range(1,sbl.shape[1]-1):

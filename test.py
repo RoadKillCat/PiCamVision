@@ -2,6 +2,6 @@ import vision
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = vision.getRawImg(480, 360)
-grey = vision.convertToGreyscale(img)
+img = vision.rawImg(480, 360)
+grey = vision.greyscale(img)
 
