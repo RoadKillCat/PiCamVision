@@ -7,7 +7,11 @@ import math
 
 def rawImg(x, y):
     """Returns numpy array of the raw camera data of size 1663x1232"""
-    import picamera
+    try:
+        import picamera
+    except ImportError:
+        print("sorry, picamera is not installed")
+        return
     x = int(32*math.ceil(x/32))
     y = int(16*math.ceil(y/16))
     with picamera.PiCamera() as camera:
@@ -17,22 +21,22 @@ def rawImg(x, y):
         return output
 
 def greyscale(img):
-    """Returns img conveted to greyscale"""
+    "Returns img conveted to greyscale"
     return np.dot(img, [0.2126, 0.7152, 0.0722])
-
+    
 def threshold(img, thresh):
-    """Returns a numpy array of boolean values"""
+    "Returns a numpy array of boolean values"
     return img > thresh
 
 def gaussianKernel(size, sigma):
-    """Returns Kernel matrix required for Gaussian Blur"""
+    "Returns Kernel matrix required for Gaussian Blur"
     bl = int((size-1)/2)
-    weightMatrix = [[ (1/(2*math.pi*sigma**2)) * math.e ** ((-1*(x**2+y**2))/(2*sigma**2)) for x in range(-bl,bl+1)] for y in range(-bl,bl+1)]
-    weightSum = sum(sum(r) for r in weightMatrix)
-    return np.array([[v/weightSum for v in r] for r in weightMatrix])
+    kernel = np.array([[ (1/(2*math.pi*sigma**2)) * math.e ** ((-1*(x**2+y**2))/(2*sigma**2)) for x in range(-bl,bl+1)] for y in range(-bl,bl+1)])
+    return kernel / np.sum(kernel)  #np.array([[v/weightSum for v in r] for r in weightMatrix])
 
-def gaussianBlur(img, kSize, kSigma):
-    """Returns a numpy array of the greyscale img gaussian blurred with the size and sigma vals WARNING: reduces dimensions"""
+
+def gaussianBlurOld(img, kSize, kSigma):
+    "Returns a numpy array of the greyscale img gaussian blurred with the size and sigma vals WARNING: reduces dimensions"
     kernel = gaussianKernel(kSize, kSigma)
     d = int((kSize-1)/2)
     gaussian = np.zeros((img.shape[0]-2*d, img.shape[1]-2*d), dtype="uint8")
@@ -44,8 +48,39 @@ def gaussianBlur(img, kSize, kSigma):
             #        gaussian[y][x] += img[(y-d)+yy][(x-d)+xx] * kernel[-d+yy][-d+xx]
     return gaussian
 
-def sobel(img, seperate=False):
-    """Returns a numpy array of the edges as gradients or if seperate, seperate gradients in the form [gx, gy, g] from the greyscale img"""
+
+def gaussianBlur(img, kSize, kSigma):
+    kernel = gaussianKernel(kSize, kSigma)
+    gausX = kernel[0][0] * img[:, kSize-1:] #np.zeros((img.shape[0]-kSize-1, img.shape[1]-kSize-1))
+    print(kernel[0])
+    for i, v in enumerate(kernel[0][1:]):
+        gausX += v * img[:, kSize-i-1 : img.shape[1]-i]
+    gausY = kernel[0][0] * gausX[kSize-1:]
+    for i, v in enumerate(kernel[:,0][1:]):
+        gausY += v * gausX[kSize-i-1 : img.shape[0]-i]
+    return gausY
+    
+
+
+def sobelX(img):
+    sblH = img[:,2:] - img[:,:-2]
+    sblV = sblH[:-2] + 2*sblH[1:-1] + sblH[2:]
+    return sblV
+
+def sobelY(img):
+    sblH = img[:,2:] + 2*img[:,1:-1] + img[:,:-2]
+    sblV = sblH[2:] - sblH[:-2]
+    return sblV
+
+def sobel(img, simple=False):
+    "Returns a numpy array of the edges of a greyscale img, simple parameter sets whether uses absolute rather than squaring"
+    if simple:
+        return abs(sobelX(img)) + abs(sobelY(img))
+    return (sobelX(img)**2 + sobelY(img)**2) ** 0.5
+
+
+def sobelOld(img, seperate=False):
+    "Returns a numpy array of the edges as gradients or if seperate, seperate gradients in the form [gx, gy, g] from the greyscale img"
     xKernel = np.array([[-1,0,1],[-2,0,2],[-1,0,1]])
     yKernel = np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
     sobelled = np.zeros((img.shape[0]-2, img.shape[1]-2, 3), dtype="uint8")
@@ -63,7 +98,7 @@ def sobel(img, seperate=False):
 
 
 def canny(img):
-    """Returns a numpy array of thinned edges with double threshold from sobel operators"""
+    "Returns a numpy array of thinned edges with double threshold from sobel operators"
     sbl = sobel(img, True)
     can = np.zeros((img.shape[0], img.shape[1]), dtype="uint8")
     for y in range(1, sbl.shape[0]-1):
@@ -80,5 +115,3 @@ def canny(img):
                 can[y][x] = sbl[y][x][2] if sbl[y][x][2] > sbl[y-1][x+1] and sbl[y][x][2] > sbl[y+1][x-1][2] else 0 
 
     return can
-
-
