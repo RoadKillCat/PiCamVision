@@ -28,18 +28,22 @@ def threshold(img, thresh):
     "Returns a numpy array of boolean values"
     return img > thresh
 
-def gaussianKernel(size, sigma):
+def gaussianKernelOld(size, sigma):
     "Returns Kernel matrix required for Gaussian Blur"
     bl = int((size-1)/2)
     kernel = np.array([[ (1/(2*math.pi*sigma**2)) * math.e ** ((-1*(x**2+y**2))/(2*sigma**2)) for x in range(-bl,bl+1)] for y in range(-bl,bl+1)])
     return kernel / np.sum(kernel)  #np.array([[v/weightSum for v in r] for r in weightMatrix])
+
+def gaussianKernel(size, sigma):
+    kernel =  np.fromfunction(lambda x, y: (1/(2*math.pi*sigma**2)) * math.e ** ((-1*((x-(size-1)/2)**2+(y-(size-1)/2)**2))/(2*sigma**2)), (size, size))
+    return kernel / np.sum(kernel)
 
 
 def gaussianBlurOld(img, kSize, kSigma):
     "Returns a numpy array of the greyscale img gaussian blurred with the size and sigma vals WARNING: reduces dimensions"
     kernel = gaussianKernel(kSize, kSigma)
     d = int((kSize-1)/2)
-    gaussian = np.zeros((img.shape[0]-2*d, img.shape[1]-2*d), dtype="uint8")
+    gaussian = np.zeros((img.shape[0]-2*d, img.shape[1]-2*d))
     for y in range(d, img.shape[0]-d):
         for x in range(d, img.shape[1]-d):
             gaussian[y-d][x-d] = np.sum(np.multiply(img[y-d:y+d+1, x-d:x+d+1], kernel))
@@ -48,18 +52,22 @@ def gaussianBlurOld(img, kSize, kSigma):
             #        gaussian[y][x] += img[(y-d)+yy][(x-d)+xx] * kernel[-d+yy][-d+xx]
     return gaussian
 
-
 def gaussianBlur(img, kSize, kSigma):
     kernel = gaussianKernel(kSize, kSigma)
-    gausX = kernel[0][0] * img[:, kSize-1:] #np.zeros((img.shape[0]-kSize-1, img.shape[1]-kSize-1))
-    print(kernel[0])
-    for i, v in enumerate(kernel[0][1:]):
-        gausX += v * img[:, kSize-i-1 : img.shape[1]-i]
-    gausY = kernel[0][0] * gausX[kSize-1:]
-    for i, v in enumerate(kernel[:,0][1:]):
-        gausY += v * gausX[kSize-i-1 : img.shape[0]-i]
+    gausX = np.zeros((img.shape[0], img.shape[1] - kSize + 1), dtype="float64") # kernel[0][0] * img[:, :img.shape[1]-kSize+1] #np.zeros((img.shape[0]-kSize-1, img.shape[1]-kSize-1))
+    print("shape of img is", img.shape, "shape of gausX is", gausX.shape)
+    for i, v in enumerate(kernel[0]):
+        print("i, v:", i, v)
+        gausX += v * img[:, i : img.shape[1] - kSize + i + 1]
+    gausY = np.zeros((gausX.shape[0] - kSize + 1, gausX.shape[1]))  #gausX[:gausX.shape[0]-kSize+1]
+    for i, v in enumerate(kernel[:,0]):
+        gausY += v * gausX[i : img.shape[0]  - kSize + i + 1]
     return gausY
-    
+
+#def gaussianBlur(img, kSize, kSigma):
+#    kernel = getKernel(kSize, kSigma)
+#    d = int((kSize-1)/2)
+#    gausX = np.zeros
 
 
 def sobelX(img):
