@@ -34,10 +34,12 @@ def gaussianKernelOld(size, sigma):
     kernel = np.array([[ (1/(2*math.pi*sigma**2)) * math.e ** ((-1*(x**2+y**2))/(2*sigma**2)) for x in range(-bl,bl+1)] for y in range(-bl,bl+1)])
     return kernel / np.sum(kernel)  #np.array([[v/weightSum for v in r] for r in weightMatrix])
 
-def gaussianKernel(size, sigma):
-    kernel =  np.fromfunction(lambda x, y: (1/(2*math.pi*sigma**2)) * math.e ** ((-1*((x-(size-1)/2)**2+(y-(size-1)/2)**2))/(2*sigma**2)), (size, size))
+def gaussianKernel(size, sigma, twoDimensional=True):
+    if twoDimensional:
+        kernel = np.fromfunction(lambda x, y: (1/(2*math.pi*sigma**2)) * math.e ** ((-1*((x-(size-1)/2)**2+(y-(size-1)/2)**2))/(2*sigma**2)), (size, size))
+    else:
+        kernel = np.fromfunction(lambda x: math.e ** ((-1*(x-(size-1)/2)**2) / (2*sigma**2)), (size,))
     return kernel / np.sum(kernel)
-
 
 def gaussianBlurOld(img, kSize, kSigma):
     "Returns a numpy array of the greyscale img gaussian blurred with the size and sigma vals WARNING: reduces dimensions"
@@ -53,14 +55,14 @@ def gaussianBlurOld(img, kSize, kSigma):
     return gaussian
 
 def gaussianBlur(img, kSize, kSigma):
-    kernel = gaussianKernel(kSize, kSigma)
+    kernel = gaussianKernel(kSize, kSigma, False)
     gausX = np.zeros((img.shape[0], img.shape[1] - kSize + 1), dtype="float64") # kernel[0][0] * img[:, :img.shape[1]-kSize+1] #np.zeros((img.shape[0]-kSize-1, img.shape[1]-kSize-1))
     print("shape of img is", img.shape, "shape of gausX is", gausX.shape)
-    for i, v in enumerate(kernel[0]):
-        print("i, v:", i, v)
+    for i, v in enumerate(kernel):
+        print("gausX:", gausX)
         gausX += v * img[:, i : img.shape[1] - kSize + i + 1]
     gausY = np.zeros((gausX.shape[0] - kSize + 1, gausX.shape[1]))  #gausX[:gausX.shape[0]-kSize+1]
-    for i, v in enumerate(kernel[:,0]):
+    for i, v in enumerate(kernel):
         gausY += v * gausX[i : img.shape[0]  - kSize + i + 1]
     return gausY
 
