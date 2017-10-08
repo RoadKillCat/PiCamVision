@@ -57,9 +57,7 @@ def gaussianBlurOld(img, kSize, kSigma):
 def gaussianBlur(img, kSize, kSigma):
     kernel = gaussianKernel(kSize, kSigma, False)
     gausX = np.zeros((img.shape[0], img.shape[1] - kSize + 1), dtype="float64") # kernel[0][0] * img[:, :img.shape[1]-kSize+1] #np.zeros((img.shape[0]-kSize-1, img.shape[1]-kSize-1))
-    print("shape of img is", img.shape, "shape of gausX is", gausX.shape)
     for i, v in enumerate(kernel):
-        print("gausX:", gausX)
         gausX += v * img[:, i : img.shape[1] - kSize + i + 1]
     gausY = np.zeros((gausX.shape[0] - kSize + 1, gausX.shape[1]))  #gausX[:gausX.shape[0]-kSize+1]
     for i, v in enumerate(kernel):
