@@ -7,7 +7,6 @@ grey = vision.greyscale(raw)
 blr  = vision.gaussian_blur(grey,3,1.5)
 sbl  = vision.sobel(grey)
 
-
 fig = plt.gcf()
 for i,a in enumerate(['raw','grey','blr','sbl']):
     ax = fig.add_subplot(2,2,i+1)
