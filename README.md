@@ -29,7 +29,7 @@ I have not written proper documentation for the functions themselves, but here i
 
 (*update with: [`cat pydoc3 vision.py >> README.md`]*)
 
-Help on module vision:
+    Help on module vision:
 
     NAME
         vision
