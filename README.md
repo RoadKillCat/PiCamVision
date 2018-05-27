@@ -22,7 +22,14 @@ Note that this library is dependent on:
 
 ### Usage
 
-This is the help page:
+The `live.py` script starts a `picamera` preview of the current camera view.
+The `test.py` script uses `vision` functions to apply some effects to an image taken from the pi.
+
+I have not written proper documentation for the functions themselves, but here is the help page:
+
+(*update with: [`cat pydoc3 vision.py >> README.md`]*)
+
+Help on module vision:
 
     NAME
         vision
@@ -32,22 +39,22 @@ This is the help page:
         Support only for rpi camera module
 
     FUNCTIONS
-        canny(img)
-            Returns a numpy array of thinned edges with double threshold from sobel operators
-        
-        gaussian_blur(img, kSize, kSigma)
+        gaussian_blur(img, k_size, k_sigma)
+            takes a greyscale image in the form of a numpy array and blurs it with a kernel of size k-size and sigma `k_sigma`
         
         gaussian_kernel(size, sigma, two_d=True)
+            returns a one-dimensional gaussian kernel if two_d is False, otherwise 2d
         
         greyscale(img)
-            Returns img conveted to greyscale
+            returns img conveted to greyscale
         
         raw_img(x, y)
-            Returns numpy array of the raw camera data of size 1663x1232
+            returns numpy array of the raw camera data of size (aspect 4:3)
         
         sobel(img, simple=False)
-            Returns a numpy array of the edges of a greyscale img, simple parameter sets whether uses absolute rather than squaring
-        
-        sobel_x(img)
-        
-        sobel_y(img)
+            returns a numpy array of the edges of a greyscale img, simple parameter sets whether uses absolute rather than squaring
+
+    FILE
+        /home/pi/rpi_vision/vision.py
+
+

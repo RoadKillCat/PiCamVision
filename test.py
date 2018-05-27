@@ -1,16 +1,17 @@
 import vision
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
 
-#chess = np.load("chess.npy")
-raw = vision.rawImg(480, 360)
+raw  = vision.raw_img(480,360)
 grey = vision.greyscale(raw)
-blr = vision.gaussianBlur(grey, 3, 1.5)
-sbl = vision.sobel(blr)
-
-print("names of conversions are: raw, grey, blr, sbl")
+blr  = vision.gaussian_blur(grey,3,1.5)
+sbl  = vision.sobel(grey)
 
 
-plt.imshow(sbl, cmap="gray")
+fig = plt.gcf()
+for i,a in enumerate(['raw','grey','blr','sbl']):
+    ax = fig.add_subplot(2,2,i+1)
+    ax.imshow(locals()[a], cmap='gray' if a!='raw' else 'jet')
+    ax.set_title(a)
+
 plt.show()
